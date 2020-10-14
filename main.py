@@ -7,6 +7,8 @@ from math import hypot
 def midpoint(p1, p2):
     return  (p1.x+p2.x)//2, (p1.y+p2.y)//2
 
+font = cv2.FONT_HERSHEY_SIMPLEX
+
 cap = cv2.VideoCapture(0)
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
@@ -50,12 +52,9 @@ while True:
         ratio_1 = hor_line_1_len/ver_line_1_len
         ratio_2 = hor_line_2_len/ver_line_2_len
 
-        if ratio_1 > 5 and ratio_2>5:
-            blinkcount=blinkcount+1
-            print("Blinked "+str(blinkcount)+" times")
+        if ratio_1 >5 and ratio_2>5:
+            cv2.putText(frame, "BLINKING",(50, 150),font, 3, (255,0,0))
 
-
-    
     cv2.imshow('Frame', frame)
     key = cv2.waitKey(1)
     if key == 27:
