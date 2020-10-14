@@ -2,6 +2,9 @@ from cv2 import cv2
 import numpy as np
 import dlib
 from math import hypot
+from pynput.mouse import Button,Controller
+
+mouse = Controller()
 
 
 def midpoint(p1, p2):
@@ -68,7 +71,9 @@ def get_gaze_ratio(eye_points, facial_landmarks):
 
 while True:
     _, frame = cap.read()
+    new_frame = np.zeros([500,500,3],np.uint8)
     frame = cv2.flip(frame, 1)
+    mouse_x, mouse_y = mouse.position
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -96,14 +101,20 @@ while True:
 
         if gaze_ratio<0.8:
             cv2.putText(frame,"LEFT",(50,100),font,2,(0,0,255),3)
+            new_frame[:] = (0,0,255)
+            mouse_x = mouse_x - 10
+            mouse.position = (mouse_x, mouse_y)
         elif 0.8<gaze_ratio<1.1:
             cv2.putText(frame,"CENTER",(50,100),font,2,(0,0,255),3)
         else:
             cv2.putText(frame,"RIGHT",(50,100),font,2,(0,0,255),3)
+            new_frame[:] = (255,0,0)
+            mouse_x = mouse_x+ 10
+            mouse.position = (mouse_x,mouse_y)
 
-        
 
     cv2.imshow('Frame', frame)
+    cv2.imshow('New frame',new_frame)
     key = cv2.waitKey(1)
     if key == 27:
         break
