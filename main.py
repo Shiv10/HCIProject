@@ -120,11 +120,11 @@ while True:
             mouse_x = mouse_x+ 10
             mouse.position = (mouse_x,mouse_y)
 
-        if vertical_ratio<0.45:
+        if vertical_ratio<0.5:
             mouse_y = mouse_y - 10
             mouse.position = (mouse_x, mouse_y)
             cv2.putText(frame,"UP",(50,150),font,2,(0,0,255),3)
-        elif 0.45<vertical_ratio<0.65:
+        elif 0.5<vertical_ratio<0.8:
             cv2.putText(frame,"CENTER",(50,150),font,2,(0,0,255),3)
         else:
             cv2.putText(frame,"DOWN",(50,150),font,2,(0,0,255),3)
