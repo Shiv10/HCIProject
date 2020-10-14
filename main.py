@@ -55,11 +55,16 @@ def get_gaze_ratio(eye_points, facial_landmarks):
     _,threshold_eye = cv2.threshold(gray_eye, 70, 255, cv2.THRESH_BINARY)
     height, width = threshold_eye.shape
     left_side_threshold = threshold_eye[0: height, 0:int(width/2)]
-    left_side_white = cv2.countNonZero(left_side_threshold)
-
+    left_side_white = cv2.countNonZero(left_side_threshold)    
 
     right_side_threshold = threshold_eye[0:height, int(width/2):width]
     right_side_white = cv2.countNonZero(right_side_threshold)
+
+    up_threshold = threshold_eye[0:int(height/2),0:width]
+    up_white = cv2.countNonZero(up_threshold);
+
+    down_threshold=threshold_eye[int(height/2):height, 0:width]
+    down_white = cv2.countNonZero(down_threshold);
 
     if left_side_white==0:
         gaze_ratio=0.5
@@ -67,11 +72,16 @@ def get_gaze_ratio(eye_points, facial_landmarks):
         gaze_ratio=2
     else:
         gaze_ratio = left_side_white/right_side_white
-    return gaze_ratio
+    if up_white==0:
+        vertical_ratio=0.8
+    elif down_white==0:
+        vertical_ratio=1.2
+    else:
+        vertical_ratio = up_white/down_white
+    return gaze_ratio,vertical_ratio
 
 while True:
     _, frame = cap.read()
-    new_frame = np.zeros([500,500,3],np.uint8)
     frame = cv2.flip(frame, 1)
     mouse_x, mouse_y = mouse.position
 
@@ -94,27 +104,34 @@ while True:
             cv2.putText(frame, 'BLINKING',(50,150),font,7,(255,0,0))
 
 
-        gaze_ratio_left_eye = get_gaze_ratio([36,37,38,39,40,41],landmarks)
-        gaze_ratio_right_eye = get_gaze_ratio([42,43,44,45,46,47],landmarks)
+        gaze_ratio_left_eye, vertical_ratio_left_eye = get_gaze_ratio([36,37,38,39,40,41],landmarks)
+        gaze_ratio_right_eye, vertical_ratio_right_eye = get_gaze_ratio([42,43,44,45,46,47],landmarks)
 
         gaze_ratio = (gaze_ratio_left_eye+gaze_ratio_right_eye)/2
-
+        vertical_ratio = (vertical_ratio_left_eye+vertical_ratio_right_eye)/2
         if gaze_ratio<0.8:
             cv2.putText(frame,"LEFT",(50,100),font,2,(0,0,255),3)
-            new_frame[:] = (0,0,255)
             mouse_x = mouse_x - 10
             mouse.position = (mouse_x, mouse_y)
         elif 0.8<gaze_ratio<1.1:
             cv2.putText(frame,"CENTER",(50,100),font,2,(0,0,255),3)
         else:
             cv2.putText(frame,"RIGHT",(50,100),font,2,(0,0,255),3)
-            new_frame[:] = (255,0,0)
             mouse_x = mouse_x+ 10
             mouse.position = (mouse_x,mouse_y)
 
+        if vertical_ratio<0.45:
+            mouse_y = mouse_y - 10
+            mouse.position = (mouse_x, mouse_y)
+            cv2.putText(frame,"UP",(50,150),font,2,(0,0,255),3)
+        elif 0.45<vertical_ratio<0.65:
+            cv2.putText(frame,"CENTER",(50,150),font,2,(0,0,255),3)
+        else:
+            cv2.putText(frame,"DOWN",(50,150),font,2,(0,0,255),3)
+            mouse_y = mouse_y + 10
+            mouse.position = (mouse_x,mouse_y)
 
     cv2.imshow('Frame', frame)
-    cv2.imshow('New frame',new_frame)
     key = cv2.waitKey(1)
     if key == 27:
         break
