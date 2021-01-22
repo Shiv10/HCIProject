@@ -95,7 +95,7 @@ while True:
         # cv2.rectangle(frame, (x ,y), (x1, y1), (255, 0, 0))
 
         landmarks = predictor(gray, face)
-        
+       
         left_eye_ratio = get_blinking_ratio([36,37,38,39,40,41], landmarks)
         right_eye_ratio = get_blinking_ratio([42,43,44,45,46,47],landmarks)
 
